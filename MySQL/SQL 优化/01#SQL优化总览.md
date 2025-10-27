@@ -191,3 +191,52 @@ WHERE user_id = ?
 ORDER BY create_time DESC, id DESC
 LIMIT 50;
 ```
+
+
+
+走索引：
+
+避免where 里使用函数（DATE(create_time)=?）
+
+避免列上函数、列上计算
+
+避免隐式类型转换
+
+使用 OR 拆分 sql，让多段查询走各自的索引
+
+最左前缀原则，复合索引尽量把非等值查询的列放后面
+
+连接查询用索引
+
+慎用 LIKE
+
+尽量让去重、分组、排序用上索引
+
+最左前缀原则（索引name age type 查询条件name type，ICP 虽然能够直接在辅助索引树上继续下探，无需回表，但是却不能减少扫描行数）
+
+
+
+扫描的少：
+
+锚点翻页（多字段排序的情况下）
+
+```sql
+SELECT  ... 
+FROM    orders
+WHERE   ...                                 -- 你的其它过滤条件
+  AND (ctime < :last_ctime
+       OR (ctime = :last_ctime AND id < :last_id))
+ORDER BY ctime DESC, id DESC
+LIMIT 200;
+```
+
+大IN改用EXISTS（小心 NULL）（本质还是想让小驱动大）
+
+连接查询时小表驱动大表
+
+派生表优化（where user_id > (select ...)）
+
+子查询优化（不要让结果集的每一行都再执行一次单独的子查询）
+
+ICP、DCP
+
