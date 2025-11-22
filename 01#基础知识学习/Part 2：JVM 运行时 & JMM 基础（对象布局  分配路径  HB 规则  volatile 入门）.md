@@ -406,7 +406,7 @@ public final class Config {
 
 为什么需要 volatile
 
-- 没有 volatile 时，new Config() 可能被重排为：分配内存 → 将引用赋给 INSTANCE → 执行构造函数。这样别的线程在第一重检查通过后，可能读到**尚未构造完成**的对象。
+- 没有 volatile 时，new Config() 可能被重排为：分配内存 → 将引用赋给 INSTANCE → 执行构造函数。这样别的线程在**第一重检查**通过后，可能读到**尚未构造完成**的对象。
 - volatile 的**写**（④）与随后其他线程的**读**共同建立 *happens-before*：构造函数中对字段的写在发布后对读线程可见，同时禁止了那种“先把引用写到 INSTANCE 再执行构造”的重排。
 
 ### #2.8.1

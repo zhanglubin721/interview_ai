@@ -23,7 +23,14 @@ CompletableFuture<Quote> p2 =
     CompletableFuture.supplyAsync(() -> getPriceByS2(), io);
 
 //这里完全不阻塞，谁先 get 完谁就先执行 save，这里的 r 即为getPriceByS1()的返回参数Quote类本身
-p1.thenAcceptAsync(r -> save(r), db);
+p1.thenAcceptAsync(q -> {
+    // 1. 对 q 做一些处理（原地改 or 生成新对象都行）
+    Quote processed = processQuote(q);  // 比如补充字段、计算折扣等等
+
+    // 2. 再保存
+    save(processed);
+}, db);
+
 p2.thenAcceptAsync(r -> save(r), db);
 
 // 如果需要“在退出前等两次保存都结束”，再统一等一下（一次阻塞）
